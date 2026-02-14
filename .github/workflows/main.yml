@@ -58,3 +58,11 @@ jobs:
       with:
         name: unsigned-ipa
         path: build/ipa/location-spoofer.ipa
+
+    - name: Upload Entitlements Files
+      uses: actions/upload-artifact@v4
+      with:
+        name: entitlements
+        path: |
+          Resources/location-spoofer.entitlements
+          Tunnel/location-spoofer-tunnel.entitlements
