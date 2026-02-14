@@ -35,7 +35,7 @@ jobs:
 
     - name: Build Unsigned iOS App
       run: |
-        # 1. 构建 Archive（关键：禁用代码签名）
+        # 1. 只构建 Archive，不签名
         xcodebuild -project location-spoofer.xcodeproj \
           -scheme location-spoofer \
           -destination 'generic/platform=iOS' \
@@ -45,32 +45,16 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO
 
-        # 2. 创建 ExportOptions.plist（指定不签名）
-        cat > ExportOptions.plist << 'EOF'
-        <?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-        <plist version="1.0">
-        <dict>
-            <key>method</key>
-            <string>development</string>
-            <key>signingStyle</key>
-            <string>manual</string>
-            <key>signingCertificate</key>
-            <string>-</string>
-            <key>provisioningProfiles</key>
-            <dict/>
-        </dict>
-        </plist>
-        EOF
+        # 2. 手动创建 IPA 结构（绕过 exportArchive）
+        mkdir -p build/ipa/Payload
+        cp -r build/location-spoofer.xcarchive/Products/Applications/location-spoofer.app build/ipa/Payload/
 
-        # 3. 导出 IPA（即使未签名也能导出）
-        xcodebuild -exportArchive \
-          -archivePath build/location-spoofer.xcarchive \
-          -exportOptionsPlist ExportOptions.plist \
-          -exportPath build/ipa
+        # 3. 压缩成 IPA
+        cd build/ipa
+        zip -qr location-spoofer.ipa Payload
 
     - name: Upload Unsigned IPA
       uses: actions/upload-artifact@v4
       with:
         name: unsigned-ipa
-        path: build/ipa/*.ipa
+        path: build/ipa/location-spoofer.ipa
