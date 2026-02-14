@@ -44,7 +44,6 @@ jobs:
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO
-          CODE_SIGN_ENTITLEMENTS="Resources/location-spoofer.entitlements"
 
         # 2. 手动创建 IPA 结构（绕过 exportArchive）
         mkdir -p build/ipa/Payload
@@ -59,3 +58,11 @@ jobs:
       with:
         name: unsigned-ipa
         path: build/ipa/location-spoofer.ipa
+
+    - name: Upload Entitlements Files
+      uses: actions/upload-artifact@v4
+      with:
+        name: entitlements
+        path: |
+          Resources/location-spoofer.entitlements
+          Tunnel/location-spoofer-tunnel.entitlements
