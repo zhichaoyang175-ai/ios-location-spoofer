@@ -8,6 +8,11 @@
 import SwiftUI
 import UIKit
 
+enum CoordinateField: Int, CaseIterable {
+    case latitude
+    case longitude
+}
+
 struct CoordinateInputView: View {
     @StateObject private var locationConfig = LocationConfiguration.shared
     @State private var latitudeText: String = ""
@@ -15,6 +20,7 @@ struct CoordinateInputView: View {
     @State private var showingPresetLocations = false
     @State private var saveError: String?
     @State private var showingSaveAlert = false
+    @FocusState private var focusedField: CoordinateField?
     
     var body: some View {
         NavigationView {
@@ -28,6 +34,18 @@ struct CoordinateInputView: View {
                             TextField("e.g., 40.7128", text: $latitudeText)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .keyboardType(.decimalPad)
+                                .focused($focusedField, equals: .latitude)
+                                .toolbar {
+                                    ToolbarItem(placement: .keyboard) {
+                                        HStack {
+                                            Spacer()
+                                            Button("Done") {
+                                                focusedField = nil
+                                            }
+                                            .fontWeight(.semibold)
+                                        }
+                                    }
+                                }
                                 .onChange(of: latitudeText) { _, newValue in
                                     validateAndSave()
                                 }
@@ -40,6 +58,18 @@ struct CoordinateInputView: View {
                             TextField("e.g., -74.0060", text: $longitudeText)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .keyboardType(.decimalPad)
+                                .focused($focusedField, equals: .longitude)
+                                .toolbar {
+                                    ToolbarItem(placement: .keyboard) {
+                                        HStack {
+                                            Spacer()
+                                            Button("Done") {
+                                                focusedField = nil
+                                            }
+                                            .fontWeight(.semibold)
+                                        }
+                                    }
+                                }
                                 .onChange(of: longitudeText) { _, newValue in
                                     validateAndSave()
                                 }
@@ -136,6 +166,7 @@ struct CoordinateInputView: View {
                     Text("Setup Instructions")
                 }
             }
+            .scrollDismissesKeyboard(.never)
             .navigationTitle("Location Settings")
             .onAppear {
                 loadCurrentCoordinates()
